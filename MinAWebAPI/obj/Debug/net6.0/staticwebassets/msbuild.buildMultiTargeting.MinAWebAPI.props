@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="..\build\MinAWebAPI.props" />
+</Project>
