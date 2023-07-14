@@ -31,11 +31,11 @@ public class NetTopologySuiteToGeoJsonConverter
         var feature = new Feature(polygon, new Dictionary<string, object>
         {
             { "index", 0 },
-            { "geotype", "Polygon" }
+            { "geotype", geometry.GeometryType }
         });
         var featureCollection = new FeatureCollection();
         featureCollection.Features.Add(feature);
-
+        
         return JsonConvert.SerializeObject(featureCollection);
     }
     public static string ConvertToGeoJsonList(List<Geometry> geometries)
@@ -68,4 +68,18 @@ public class NetTopologySuiteToGeoJsonConverter
 
         return JsonConvert.SerializeObject(featureCollection);
     }
+    
+    // public static string UpdateGeometry(string geoJsonString, Geometry newGeometry)
+    // {
+    //     // Parse the existing GeoJSON string
+    //     var feature = JsonConvert.DeserializeObject<Feature>(geoJsonString);
+    //
+    //     // Create a new feature with the updated geometry
+    //     var updatedFeature = new Feature(newGeometry, feature.Properties, feature.Id);
+    //
+    //     // Serialize the updated feature to a new GeoJSON string
+    //     var updatedGeoJsonString = JsonConvert.SerializeObject(updatedFeature);
+    //
+    //     return updatedGeoJsonString;
+    // }
 }

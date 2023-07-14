@@ -8,6 +8,7 @@
     ".NETCoreApp,Version=v6.0": {
       "MinAWebAPI/1.0.0": {
         "dependencies": {
+          "GeoAPI": "1.7.5",
           "GeoJSON.Net": "1.3.6-rc",
           "GeoJSON4EntityFramework": "2.2.0",
           "Microsoft.AspNetCore.JsonPatch": "6.0.19",
@@ -35,6 +36,31 @@
           "lib/net45/EntityFramework.dll": {
             "assemblyVersion": "6.0.0.0",
             "fileVersion": "6.0.20911.0"
+          }
+        }
+      },
+      "GeoAPI/1.7.5": {
+        "dependencies": {
+          "GeoAPI.CoordinateSystems": "1.7.5",
+          "GeoAPI.Core": "1.7.5"
+        }
+      },
+      "GeoAPI.CoordinateSystems/1.7.5": {
+        "dependencies": {
+          "GeoAPI.Core": "1.7.5"
+        },
+        "runtime": {
+          "lib/netstandard2.0/GeoAPI.CoordinateSystems.dll": {
+            "assemblyVersion": "1.7.5.0",
+            "fileVersion": "1.7.5.0"
+          }
+        }
+      },
+      "GeoAPI.Core/1.7.5": {
+        "runtime": {
+          "lib/netstandard2.0/GeoAPI.dll": {
+            "assemblyVersion": "1.7.5.0",
+            "fileVersion": "1.7.5.0"
           }
         }
       },
@@ -699,6 +725,27 @@
       "sha512": "sha512-y6lX/VMghGBV6TvgQS4Q2WK6kAcOoyD+TQxObN9utd0JsMMdMxyqARxKbvgi7KEIbQ8osZ4ZvImaly7l3NDFDw==",
       "path": "entityframework/6.0.0",
       "hashPath": "entityframework.6.0.0.nupkg.sha512"
+    },
+    "GeoAPI/1.7.5": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-LAHPEztEGuR3LGtnNYOqg2JvUaw449gcACYqmy1pr129R2cWaV+Q9Lne8YgEwCnksHCVoXyQmuKY+CvsgPYmng==",
+      "path": "geoapi/1.7.5",
+      "hashPath": "geoapi.1.7.5.nupkg.sha512"
+    },
+    "GeoAPI.CoordinateSystems/1.7.5": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-JBcvkeQFjCW9NTfkII5WiJNmnv0ZtYA/VTVljbIqDFWBJ8kHwu2UHd2MVStD/VVHVnLoyNcDIapsuTENdlyF3g==",
+      "path": "geoapi.coordinatesystems/1.7.5",
+      "hashPath": "geoapi.coordinatesystems.1.7.5.nupkg.sha512"
+    },
+    "GeoAPI.Core/1.7.5": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-Dy/YkgZ1szgx+xbVWqMi+4++Fm6v3szbVdei1LKPRZ3meSvgNSMZxqhar5IAeaTj5LcUHLtLGdfyUtkjnYbg3A==",
+      "path": "geoapi.core/1.7.5",
+      "hashPath": "geoapi.core.1.7.5.nupkg.sha512"
     },
     "GeoJSON.Net/1.3.6-rc": {
       "type": "package",

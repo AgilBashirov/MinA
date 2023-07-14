@@ -85,3 +85,5 @@ D:\softwaredepartment\MinA\MinAWebAPI\obj\Debug\net6.0\staticwebassets\msbuild.b
 D:\softwaredepartment\MinA\MinAWebAPI\obj\Debug\net6.0\staticwebassets\msbuild.buildTransitive.MinAWebAPI.props
 D:\softwaredepartment\MinA\MinAWebAPI\obj\Debug\net6.0\staticwebassets.pack.json
 D:\softwaredepartment\MinA\MinAWebAPI\bin\Debug\net6.0\GeoJSON.Net.dll
+D:\softwaredepartment\MinA\MinAWebAPI\bin\Debug\net6.0\GeoAPI.CoordinateSystems.dll
+D:\softwaredepartment\MinA\MinAWebAPI\bin\Debug\net6.0\GeoAPI.dll
