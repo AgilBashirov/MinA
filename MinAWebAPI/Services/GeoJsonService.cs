@@ -5,27 +5,26 @@ using NetTopologySuite.Geometries;
 using NetTopologySuite.IO;
 using Newtonsoft.Json;
 using GeoJSON.Net.Feature;
-using Feature = GeoJSON.Net.Feature.Feature;
 
 namespace MinAWebAPI.Services;
 
 public class GeoJsonService
 {
-    public static void GeoJsonToGeometry(string geoJson)
+    public static NetTopologySuite.Geometries.Geometry GeoJsonToGeometry(string geoJson)
     {
-        // Create a JSON reader
-        var reader = new JsonTextReader(new System.IO.StringReader(geoJson));
+        var reader = new GeoJsonReader();
+        var feature = reader.Read<NetTopologySuite.Features.Feature>(geoJson);
+        var geometry = feature.Geometry as Geometry;
 
-// Create a GeoJsonSerializer
-        var serializer = new NetTopologySuite.IO.GeoJsonSerializer();
-
-// Deserialize the GeoJSON data to a Feature
-        var feature = serializer.Deserialize<Feature>(reader);
-
-// Get the geometry from the feature
-        var geometry = feature.Geometry;
-
-// Convert the geometry to a NetTopologySuite Geometry object
-        // var ntsGeometry = geometry.ToNTSGeometry();
+        return geometry;
     }
+
+    public static async Task<string> FileToGeoJson(IFormFile file)
+    {
+        using var streamReader = new StreamReader(file.OpenReadStream());
+        if (streamReader == null) throw new ArgumentNullException(nameof(streamReader));
+        return await streamReader.ReadToEndAsync();
+    }
+
+  
 }

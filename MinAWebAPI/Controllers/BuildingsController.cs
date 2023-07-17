@@ -34,7 +34,7 @@ namespace MinAWebAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult> Get()
+        public async Task<IActionResult> Get()
         {
             var buildings = await _context.Binas.ToListAsync();
 
@@ -51,7 +51,7 @@ namespace MinAWebAPI.Controllers
         }
         
         [HttpGet("{id}")]
-        public async Task<ActionResult> Get(int id)
+        public async Task<IActionResult> Get(int id)
         {
             var building = await _context.Binas.FirstOrDefaultAsync(x=>x.Id == id);
 
@@ -63,8 +63,35 @@ namespace MinAWebAPI.Controllers
             return Ok(geoJson);
         }
 
+        [HttpPost]
+        public async Task<IActionResult> Create(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+            {
+                return BadRequest("No file uploaded.");
+            }
+
+            if (!file.FileName.EndsWith(".json") && !file.FileName.EndsWith(".geojson"))
+            {
+                return BadRequest("Invalid file format. Only GeoJSON files are allowed.");
+            }
+
+            var geojsonData = await GeoJsonService.FileToGeoJson(file);
+            
+            var geo = GeoJsonService.GeoJsonToGeometry(geojsonData);
+
+            var result  = await _context.Binas.AddAsync(new Bina()
+            {
+                WkbGeometry = geo
+            });
+            
+            await _context.SaveChangesAsync();
+
+            return Ok("File uploaded successfully.");
+        }
+        
         [HttpPut("{id}")]
-        public async Task<ActionResult> Update(int id, IFormFile geometryFile)
+        public async Task<IActionResult> Update(int id, IFormFile file)
         {
             var existingBina = await _context.Binas.FindAsync(id);
 
@@ -73,60 +100,50 @@ namespace MinAWebAPI.Controllers
                 return NotFound();
             }
 
-            // Dosyadan veriyi okuyun
-            using (var memoryStream = new MemoryStream())
-            {
-                await geometryFile.CopyToAsync(memoryStream);
-                var geometryBytes = memoryStream.ToArray();
-
-                // Dosyadaki geometri verisini Geometry nesnesine dönüştürün
-                GeometryFactory geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
-                var reader = new WKBReader(geometryFactory.GeometryServices);
-                var geometry = reader.Read(geometryBytes);
-
-                // Güncelleme işlemlerinde Geometry nesnesini kullanın
-                existingBina.WkbGeometry = geometry;
-            }
-            // var coordinates = building.WkbGeometry.Coordinates;
-            // var polygon = new Polygon(new LinearRing(coordinates));
-            
-            // // Convert the geometry to GeoJSON
-            // var geoJson = NetTopologySuiteToGeoJsonConverter.ConvertToGeoJson(geometry);
-            return Ok();
-        }
-        
-        [HttpPost]
-        public async Task<IActionResult> UploadGeoJSON(IFormFile file)
-        {
             if (file == null || file.Length == 0)
             {
                 return BadRequest("No file uploaded.");
             }
 
-            // Ensure the file has a .json or .geojson extension
             if (!file.FileName.EndsWith(".json") && !file.FileName.EndsWith(".geojson"))
             {
                 return BadRequest("Invalid file format. Only GeoJSON files are allowed.");
             }
 
-            // Process the GeoJSON file
-            // Here, you can perform any necessary operations on the uploaded file
-            // such as reading, parsing, and validating the GeoJSON data
+            var geojsonData = await GeoJsonService.FileToGeoJson(file);
+            var geo = GeoJsonService.GeoJsonToGeometry(geojsonData);
 
-            // Example: Read the GeoJSON data
-            using var streamReader = new StreamReader(file.OpenReadStream());
-            var geojsonData = await streamReader.ReadToEndAsync();
+            existingBina.WkbGeometry = geo;
 
-            // Example: Print the GeoJSON data
-            System.Console.WriteLine(geojsonData);
+            await _context.SaveChangesAsync();
             
-            GeoJsonService.GeoJsonToGeometry(geojsonData);
-
-            return Ok("File uploaded successfully.");
-            
-            
+            return Ok("File updated successfully.");
         }
-        
 
+        [HttpDelete("{id}")]
+        public async Task Delete(int id)
+        {
+            var currentBina = await _context.Binas.FindAsync(id);
+            if(currentBina is null) throw new ArgumentNullException(nameof(currentBina));
+            _context.Remove(currentBina);
+        }
+
+
+        // [HttpGet("GetPoi/{id}")]
+        // public async Task GetPoi(int id)
+        // {
+        //      var poi = await _context.Pois.ToListAsync();
+        //
+        //      var bina = await _context.Binas.FindAsync(id);
+        //
+        //      var overlappedPolygon =poi.WkbGeometry.Intersection(bina.WkbGeometry);
+        //      
+        //      var overlappedPoints = overlappedPolygon.Coordinates;
+        //      foreach (var point in overlappedPoints)
+        //      {
+        //          Console.WriteLine(point); // Prints the overlapped points
+        //      }
+        // }
+        
     }
 }
