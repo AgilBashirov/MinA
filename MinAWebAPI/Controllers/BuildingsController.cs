@@ -18,6 +18,8 @@ using Npgsql;
 using System.IO;
 using System.Linq;
 using MinAWebAPI.Services;
+using NetTopologySuite.Index.Strtree;
+using Point = GeoJSON.Net.Geometry.Point;
 
 
 namespace MinAWebAPI.Controllers
@@ -38,26 +40,26 @@ namespace MinAWebAPI.Controllers
         {
             var buildings = await _context.Binas.ToListAsync();
 
-            List<Geometry> geometries  = new();
+            List<Geometry> geometries = new();
 
             foreach (var build in buildings)
             {
                 geometries.Add(build.WkbGeometry!);
             }
-            
+
             // // Convert the geometry to GeoJSON
             var geoJson = NetTopologySuiteToGeoJsonConverter.ConvertToGeoJsonList(geometries);
             return Ok(geoJson);
         }
-        
+
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(int id)
         {
-            var building = await _context.Binas.FirstOrDefaultAsync(x=>x.Id == id);
+            var building = await _context.Binas.FirstOrDefaultAsync(x => x.Id == id);
 
             var coordinates = building.WkbGeometry.Coordinates;
             var polygon = new Polygon(new LinearRing(coordinates));
-            
+
             // // Convert the geometry to GeoJSON
             var geoJson = NetTopologySuiteToGeoJsonConverter.ConvertToGeoJson(polygon);
             return Ok(geoJson);
@@ -77,19 +79,20 @@ namespace MinAWebAPI.Controllers
             }
 
             var geojsonData = await GeoJsonService.FileToGeoJson(file);
-            
-            var geo = GeoJsonService.GeoJsonToGeometry(geojsonData);
 
-            var result  = await _context.Binas.AddAsync(new Bina()
+            var geo = GeoJsonService.GeoJsonToGeometry(geojsonData);
+            var newBina = new Bina()
             {
                 WkbGeometry = geo
-            });
-            
+            };
+
+            var result = await _context.Binas.AddAsync(newBina);
+
             await _context.SaveChangesAsync();
 
-            return Ok("File uploaded successfully.");
+            return Ok(newBina.Id);
         }
-        
+
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, IFormFile file)
         {
@@ -116,34 +119,38 @@ namespace MinAWebAPI.Controllers
             existingBina.WkbGeometry = geo;
 
             await _context.SaveChangesAsync();
-            
+
             return Ok("File updated successfully.");
         }
 
         [HttpDelete("{id}")]
-        public async Task Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
             var currentBina = await _context.Binas.FindAsync(id);
-            if(currentBina is null) throw new ArgumentNullException(nameof(currentBina));
+            if (currentBina is null) throw new ArgumentNullException(nameof(currentBina));
             _context.Remove(currentBina);
+            return Ok("File deleted successfully.");
         }
 
 
-        // [HttpGet("GetPoi/{id}")]
-        // public async Task GetPoi(int id)
-        // {
-        //      var poi = await _context.Pois.ToListAsync();
-        //
-        //      var bina = await _context.Binas.FindAsync(id);
-        //
-        //      var overlappedPolygon =poi.WkbGeometry.Intersection(bina.WkbGeometry);
-        //      
-        //      var overlappedPoints = overlappedPolygon.Coordinates;
-        //      foreach (var point in overlappedPoints)
-        //      {
-        //          Console.WriteLine(point); // Prints the overlapped points
-        //      }
-        // }
-        
+        [HttpGet("GetPoi/{id}")]
+        public async Task<IActionResult> GetPoi(int id)
+        {
+            var bina = await _context.Binas.FindAsync(id);
+            var geometry = bina?.WkbGeometry;
+            var pois = await _context.Pois.ToListAsync();
+            var pointList = new List<NetTopologySuite.Geometries.Point>();
+
+            foreach (var poi in pois)
+            {
+                pointList.Add(poi.WkbGeometry);
+            }
+
+            var points = pointList.Where(x => geometry.Contains(x)).ToList();
+            
+
+            var result = NetTopologySuiteToGeoJsonConverter.ConvertPointToJson(points);
+            return Ok(result);
+        }
     }
 }

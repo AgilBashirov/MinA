@@ -3,12 +3,13 @@ using GeoJSON.Net.Geometry;
 
 using Newtonsoft.Json;
 using System.Collections.Generic;
-using GeoJSON.Net.Feature;
 using NetTopologySuite.Geometries;
 using LineString = GeoJSON.Net.Geometry.LineString;
 using Polygon = GeoJSON.Net.Geometry.Polygon;
 using Position = GeoJSON.Net.Geometry.Position;
 using Feature = GeoJSON.Net.Feature.Feature;
+using FeatureCollection = GeoJSON.Net.Feature.FeatureCollection;
+using Point = GeoJSON.Net.Geometry.Point;
 
 
 namespace MinAWebAPI.Helpers;
@@ -38,6 +39,7 @@ public class NetTopologySuiteToGeoJsonConverter
         
         return JsonConvert.SerializeObject(featureCollection);
     }
+    
     public static string ConvertToGeoJsonList(List<Geometry> geometries)
     {
         var features = new List<Feature>();
@@ -68,18 +70,19 @@ public class NetTopologySuiteToGeoJsonConverter
 
         return JsonConvert.SerializeObject(featureCollection);
     }
+
+    public static string ConvertPointToJson(List<NetTopologySuite.Geometries.Point> points)
+    {
+        var features = new List<GeoJSON.Net.Feature.Feature>();
+        foreach (var point in points)
+        {
+            var p = new Point(new Position(point.X, point.Y));
+            var feature = new Feature(p);
+            if (feature != null) features.Add(feature);
+        }
+        var featureCollection = new FeatureCollection(features);
+        
+        return JsonConvert.SerializeObject(featureCollection);
+    }
     
-    // public static string UpdateGeometry(string geoJsonString, Geometry newGeometry)
-    // {
-    //     // Parse the existing GeoJSON string
-    //     var feature = JsonConvert.DeserializeObject<Feature>(geoJsonString);
-    //
-    //     // Create a new feature with the updated geometry
-    //     var updatedFeature = new Feature(newGeometry, feature.Properties, feature.Id);
-    //
-    //     // Serialize the updated feature to a new GeoJSON string
-    //     var updatedGeoJsonString = JsonConvert.SerializeObject(updatedFeature);
-    //
-    //     return updatedGeoJsonString;
-    // }
 }
